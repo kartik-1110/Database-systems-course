@@ -133,4 +133,253 @@
     - Items must have unique value per group
 
 
+==> Unknown values
+-Unknown values are called NULL values in SQL.
+-SQL uses Ternary (i.e. Three - Value Logic)
+    - Outcome may be true or false or Unknown
+- Check for corresponding item
+    - <expression> = TRUE                
+    - <expression> = FALSE                
+    - <expression> is NULL (not: "=NULL")
+- WHERE condition to null - no results now!
+
+
+==> Join with Unknowns
+- Standard join keeps matching row pairs
+- ELiminates rows without matching rows in other table
+- Sometimes we want to keep rows regardless
+-Can do that with OUTER JOINS 
+    - Fills up fields in missing row with NULL values
+
+
+==> Set Operations
+- Union result tupkes from 2 queries
+
+    //SYNTAX 
+        <query 1> UNION <query 2> : ELiminates duplicates
+        <query 1> UNION ALL<query 2> : keep duplicates
+
+- Intersect results from 2 queries 
+    //SYNTAX
+        <query 1> INTERSECT <query 2>
+
+- Set difference from 2 queries 
+    //SYNTAX
+        <query 1> EXCEPT <query 2>
+
+******* Results from query 1 and query 2 must be union compatible.
+
+
+==> From files to pages
+- Possibility 1: Store pages as (doubly) linked list
+    - Each page contain pointer to prior/ next page
+    - Can use separate list for partially/ full empty pages
+    - References to headr page is stored in DB catalogue
+
+- Possibility 2: Directory with pointers to pages
+    - Directory pages reference data pages with meta-data.
+
+
+==> From pages to slots
+- Pages are divided into slots- Each slot stores one record (i.e table row)
+- Each slot stores one record (i.e table row) 
+- Can refer to records via (pageID, slotID)
+- Multiple ways to divide pages into slots 
+- Fixed length VS variable length records
+
+
+==> From slots to fields
+- Must divide each slots into pages
+- Fixed length VS variable length fields
+- Fixed length : Store field sizes on page
+- variable length : Store field sizes on page
+    - Option 1: use special delimiter symbol between fields
+    - Option 2: Store "field Directory " at beginning of record.
+
+
+==> INDEXES
+- Index - auxiliary data structure for finding data faster
+- Exactly same principle as for books
+- Can have multiple indexes for same table: 
+    - One index for finding info on specific students
+    - One index for finding info on specific causes
+
+
+==> Composite keys
+- Index search keys may consists of multiple columns
+- Must decide priority order between key columns
+- key constraints use that priority order: 
+    - i.e consider second column if same value in 1st etc.
+- Can use index for (in)equalities on prefix key column
+
+
+==> Indexes in Postgres
+//SYNTAX
+    CREATE INDEX <index name> ON <table>(<columns>)
     
+    - Creates index for table using specified search keys
+    - Refer to indedx later via <index- name>
+
+    DROP INDEX <index - name>
+        
+        -Delete index with given name
+
+
+==> B+ Trees
+- One of the most popular index structure 
+    -Eg: the default index in Postgres
+- Balances tree after insert/Delete Option
+- Keeps tree compact
+    - Each node (except root ) is atleast half full
+    - i.e. number entries between d and d*2 (d is order)
+
+
+==> Hash VS Tree indexes
+- Tree index : Traverse search tree to find interesting leafs
+- Hash index: evaluates hash function to find buckets
+
+
+==> Hash index variants
+- Static Hashing: bad for dynamic data
+- Extendible hashing : Expands with few-high-overhead Operations
+- Linear hashing : Expands more smoothly
+
+
+==> Static hashing
+- Hash bucket pages contain references to data
+- Hash buckets are associated with hash values
+- Can use haash index to find entries with key Value   
+    - Calculate hash value h for V as h(V)
+    - Look up bucket page associated with h
+
+
+****Global depth: how many hash bits Directory considers
+****Local depth : how many hash bits for specific bucket
+
+
+==> Linear hashing:
+- Idea:  Avoid Directory by fixing next bucket to split
+- We do not have to split overflowing buckets
+- i.e. we may have temporary overlow pages
+- Buckets to split are selected in round robin fashion
+- Means overflowing bucket will be split eventually
+
+
+==> Choose index type in Postgres
+// SYNTAX
+    CREATE INDEX <index name> ON <table>
+    USING <method >(<column-list>)
+- Can Choose btree or hash for method
+
+
+==> Buffer manager
+- Decides when to move data between disk and RAM
+- Tries to reduce data movement using heuristics
+- Buffer manager manages "buffer pool":
+    - Buffer pool:  main memory reserved for DBMS
+    - Deivided into pool sized slots called frames
+    - Stores meta -data about each slot
+
+
+==> Query processing
+- Input query is passed (Parser) and simplified (Rewrite)
+- Query optimizer generates optimized execution plan
+- Executing plan (Executor) produces query result
+
+
+==> Query plans
+- Describes how to generate req data
+- Typically represented as a tree
+- Each leaf node represents as a database table
+- Each inner node represents a Operation
+- Tree edges represents data flow
+
+
+==> Operators
+- Filter operator (σ) : discard rows based in condition
+- Projection operator (π): discard columns
+- Join operator : find matching tuple pairs
+
+
+==> Join operator
+- Block nested loop join: 
+    - Page nested loop: read inner table for each outer page
+    - Block nested loop: read inner table for each outer Block
+        - More efficient as block contains multiple pages
+
+
+==> Index nested loop join
+- Idea: have index on join column and equally predicate
+- Iterate over pages of non- indexed (outer) table
+- For each outer tuple us index to find matching tuples
+
+
+==> Hash Join , Sort merge join
+
+==> Hash join 
+- Want tuples with same value in join column
+- Same value in joinn column implies same hash value
+
+- Join phase 1: 
+    - Partition data by hash values in join columns
+        - Make partitions small enough to fit index memory
+
+- Join phase 2: 
+    - Join each partition pair (same hash value ) separately
+
+
+==> Sort-merge join
+- Also specific to equal join conditions
+-Phase 1: (sort)
+    - Sort joined tables on join column
+
+- Phase 2(merge): 
+    - Efficiently merge sorted tables together
+
+
+==> Projection and duplicate elimination via sorting
+- Idea: sorting rows helps finding duplicates
+    - duplicates appear consecutively
+- use variant of external sort alogorithm seen before
+    - Apply projection during 1st pass over data
+    - Eliminate in-memory duplicates during all steps
+    - The result is duplicate-free and sorted
+    - Can reduce no. of passes with main memory
+
+
+==> GROUPING & AGGREGATION  
+
+- Aggregation without groups:
+    - SQL offers Min, Max, Sum, Count, Avg
+    -Scan input and update in-memory aggregate
+        - Can use const amount of memory
+        - Cost of reading input data once
+    - Count distinct requires duplicate elimination    
+
+- Aggregation without groups:
+    - Can use hashing: 
+        - Maintain has table of group keys with aggregate
+    - Can use strings:
+        - Sort on group keys aggregate groups consecutively
+    - Can use indexes:
+        - Index key must contain group- by keys
+
+
+===== DATABASE TRANSACTIONS =====
+
+- A sequence of updates (or queries) that is connected
+- DBMS commands for assigning queries to Transactions
+
+==> Transaction in Postgres
+- Begin a Transaction with command BEGIN 
+- End a Transaction with command COMMIT
+- Everything in between belongs to Transaction
+
+
+==> ACID Guarantees
+- Most RDBMS gives ACID guarantee for Transaction
+
+    A: Atomicity -(either execut all or nothing)
+    C: Consistency -(enforce all integrity constraints)
+    I: Isolation -(avoid interleaving transactions badly)
+    D: Durability -(ensures that updates are not last)
