@@ -1,0 +1,136 @@
+========== Database Systems ==========
+==SQL
+
+==> SQL command types
+-DDL : Data Definition Language
+    - Define admissible Database content (schema)
+- DML : Data Manipulation Language
+    - Change and retrieve database content
+- TCL : Transaction Control Language
+    - Groups SQL commands (Transactions)
+- DCL : Data Control Language
+    - Assign data access rights
+
+
+==> schema Definition in SQL
+- CREATE TABLE <table>(<table - def>)   
+- <table> is table name
+- <table - def> is comma separated column Definition
+- Column definition is of form <col-name><col-type>
+
+
+==> Integrite constraints
+- constraints that limit admissible context of tables
+- DBMS enforces integrity constraints
+- Can be added to the table via "ALTER TABLE " command
+- Alternatively, con define while creating table
+
+
+1: Primary key constraint
+- A Primary key constraint refers to a single table
+- It identifies a subset of columns as key columns
+- Firing values for key columns must identify now
+- No two rows have same value in key columns
+
+
+// SYNTAX
+    ALTER TABLE <table>
+    ADD CONSTRAINT Primary key (<key-value>)
+
+- <table> is a table name
+- <key- cols> is a comma separated list of column names
+
+
+2: Foreign key constraint
+- A Foreign key constraint links two tables
+- identifies set of Foreign key columns in table 1
+- Maps Foreign key columns to Primary key of table 2
+- values in Foreign key column must appear as primary key
+- Maps each row in table 1 to row from table 2
+
+
+// SYNTAX   
+    ALTER TABLE <table -1>
+    ADD CONSTRAINTS Foreign key (<fkey-columns>)
+    REFERENCES  <table-2> (<p-key-columns>)
+
+- <table-1> is a table with Foreign key
+- <fkey - column> is a comma separated for key columns
+- <table -2 > is a comma separated primary keys
+
+
+=======> Data Manipulation Language
+
+==> Inserting one(fully specified) row in table;
+//SYNTAX
+    INSERT INTO <table> VALUES (<value-list>)
+
+
+==> Inserting one(partially specified) row in table;
+//SYNTAX
+    INSERT INTO <table>(<column-list>) VALUES (<value-list>)
+
+
+==> Inserting data from files
+// SYNTAX
+    COPY <table> FROM <path>
+    DELIMITER <delimiter> NULL <null-string> CSV;
+
+
+==> Deleting data
+- Deleting rows from a table that satisfy condition
+//SYNTAX
+    DELETE FROM <table> WHERE <condition>
+
+- <condition> specifies Boolean predicate 
+- Eg: Inequalities between columns
+
+
+==> Updating data
+//SYNTAX
+    UPDATE <table>
+    SET <column> = <value>
+    WHERE <condition>
+
+- changes rows satisfying <condition> by writing <value > in <column>
+
+
+==> Diverse select clause
+
+- Shortcuts for slecting multiple columns
+    * Selects all columns
+    <table>, * Selects all columns from <table>
+- Can use arithematic expression in select clause
+    Eg: SELECT 3 * (<column1>+<column2>)
+- Can assign new names for O/P columns
+    Eg: SELECT Sname as StudentName;
+
+
+==> Join syntax Alternative
+
+-Simple specify names of columns that appear in multiple tables
+    <table1 > JOIN <table 2> USING (<column>)
+
+- Abbreviates <table 1 > JOIN <table 2>
+    ON(<table 1>.<column> = <table 2>.<column>)
+
+- "Natural joins" match alues in columns with same name
+    <table 1> NATURAL JOIN <table 2>;
+    - Introduces equality conditions between columns of same name
+
+- No join keyword 
+    FROM <table 1>, <table 2 > WHERE <join-condition>;
+
+
+==> syntax for Ordering
+- ORDER BY <order- item - list>
+- <order-item> : <column><direction>
+- <direction> : either ASC or DESC
+
+- Orders result by rows values in order item
+- Prioritize order item that appear earliest 
+- Applies after grouping 
+    - Items must have unique value per group
+
+
+    
